@@ -8,9 +8,9 @@ execute:
 book:
   title: "Final Project"
   author:
-    - AUTHOR1 (UNI1)
-    - AUTHOR2 (UNI2)
-  repo-url: https://github.com/YOUR_GITHUB_ACCOUNT/REPO_NAME
+    - Yangruonan Lin (yl5765)
+    - Ruobing Zhang (rz2703)
+  repo-url: https://github.com/ZoeyLin722/Final-Project
   date: today
   page-footer:
     right: |
