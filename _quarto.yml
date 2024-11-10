@@ -6,7 +6,7 @@ execute:
   echo: true
 
 book:
-  title: "YOUR PROJECT TITLE"
+  title: "Final Project"
   author:
     - AUTHOR1 (UNI1)
     - AUTHOR2 (UNI2)
