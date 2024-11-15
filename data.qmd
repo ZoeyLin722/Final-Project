@@ -2,4 +2,26 @@
 
 ## Description
 
+The Apartment Building Evaluation dataset is collected by the City of Toronto's Municipal Licensing & Standards division. It comprises evaluations of apartment buildings across Toronto, assessing various quality and compliance metrics. The data is publicly accessible through the City of Toronto's Open Data Portal.
+
+The dataset is available in CSV format, facilitating easy integration with data analysis tools. Each row represents an individual apartment building evaluation, with columns detailing attributes such as building address, evaluation scores, compliance status, and inspection dates. The dataset is updated by the end of every year.
+
+The dataset includes multiple columns capturing various aspects of apartment building evaluations. The number of rows corresponds to the total number of evaluated buildings, which may vary with each update. Key columns typically include:
+
+- Year Built: The year when the apartment was built.
+- Evaluation Score: A numerical score representing the building's quality assessment.
+- Wardname: The particular area where the apartment is located. 
+- Property Type: The particular type of the apartment (private, social housing, Toronto community Housing Corporation).
+
+The dataset contains a lot of missing values for variables including "FENCING", "RETAINING WALLS", "CATCH BASINS / STORM DRAINAGE", "CLOTHING DROP BOXES", "ACCESSORY BUILDINGS", and so on. These variables might be deleted if missing values are dominant.
+
+To import the dataset into R for analysis, first download the CSV file from the website, then use the read.csv() function to load the data.
+
+The dataset is here: [https://open.toronto.ca/dataset/apartment-building-evaluation/]
+
 ## Missing value analysis
+
+```{r}
+
+```
+
