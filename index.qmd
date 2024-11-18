@@ -8,12 +8,20 @@ editor:
 
 The availability and quality of housing are critical indicators of a city's livability and sustainability.
 As one of the largest and fastest-growing cities in Canada, Toronto faces significant challenges in maintaining affordable, safe, and high-quality housing for its residents.
+
 The Apartment Building Evaluation database, provided by the City of Toronto, serves as a valuable resource for analyzing the quality of housing across the city.
 This dataset contains useful information, including the physical condition of buildings, availability of amenities, compliance with municipal standards, and management practices.
 These data points enable a comprehensive assessment of the factors that contribute to the evaluation scores of apartment buildings.
+
 We chose this topic because housing is a fundamental human need, and understanding the quality of Toronto's apartment buildings can shed light on broader issues related to urban living, social equity, and public policy.
 This analysis is particularly relevant given the rising concerns over housing affordability and safety in urban centers globally.
-The questions we are interested in studying include: \* What patterns emerge in apartment building evaluations across Toronto?
-\* Are there geographical disparities in building quality within the city?
-\* What factors correlate most strongly with higher or lower evaluation scores?
-\* How do building conditions align with socioeconomic indicators in different neighborhoods?
+
+The questions we are interested in studying include:
+
+**What patterns emerge in apartment building evaluations across Toronto?**
+
+**Are there geographical disparities in building quality within the city?**
+
+**What factors correlate most strongly with higher or lower evaluation scores?**
+
+**How do building conditions align with socioeconomic indicators in different neighborhoods?**
