@@ -2,26 +2,76 @@
 
 ## Description
 
-The Apartment Building Evaluation dataset is collected by the City of Toronto's Municipal Licensing & Standards division. It comprises evaluations of apartment buildings across Toronto, assessing various quality and compliance metrics. The data is publicly accessible through the City of Toronto's Open Data Portal.
+The Apartment Building Evaluation dataset, available from the City of Toronto's Open Data Portal, comprises 3,571 entries and a total of 71 columns. It comprises evaluations of apartment buildings across Toronto, assessing various quality and compliance metrics. The data is publicly accessible through the City of Toronto's Open Data Portal.
 
 The dataset is available in CSV format, facilitating easy integration with data analysis tools. Each row represents an individual apartment building evaluation, with columns detailing attributes such as building address, evaluation scores, compliance status, and inspection dates. The dataset is updated by the end of every year.
 
-The dataset includes multiple columns capturing various aspects of apartment building evaluations. The number of rows corresponds to the total number of evaluated buildings, which may vary with each update. Key columns typically include:
+The dataset includes multiple columns capturing various aspects of apartment building evaluations. The number of rows corresponds to the total number of evaluated buildings, which may vary with each update. Key columns include:
 
-- Year Built: The year when the apartment was built.
-- Evaluation Score: A numerical score representing the building's quality assessment.
-- Wardname: The particular area where the apartment is located. 
-- Property Type: The particular type of the apartment (private, social housing, Toronto community Housing Corporation).
+-   Year Built: The year when the apartment was built.
+-   Evaluation Score: A numerical score representing the building's quality assessment.
+-   Wardname: The particular area where the apartment is located.
+-   Property Type: The particular type of the apartment (private, social housing, Toronto community Housing Corporation).
 
 The dataset contains a lot of missing values for variables including "FENCING", "RETAINING WALLS", "CATCH BASINS / STORM DRAINAGE", "CLOTHING DROP BOXES", "ACCESSORY BUILDINGS", and so on. These variables might be deleted if missing values are dominant.
 
 To import the dataset into R for analysis, first download the CSV file from the website, then use the read.csv() function to load the data.
 
-The dataset is here: [https://open.toronto.ca/dataset/apartment-building-evaluation/]
+The dataset is available on the City of Toronto's Open Data Portal: \[https://open.toronto.ca/dataset/apartment-building-evaluation/\]
+
+```{r}
+building <- read.csv("/Users/ruobingzhang/Documents/==/columbia/sem1/stat5702EDA/EDAfinal2/Apartment Building Evaluations 2023 - current.csv")
+```
+
+```{r}
+shape <- dim(building)
+cat("The dataset has", shape[1], "rows and", shape[2], "columns.\n")
+```
 
 ## Missing value analysis
 
 ```{r}
-
+sum(is.na(building))
 ```
 
+```{r}
+library(ggplot2)
+missing_counts <- colSums(is.na(building))
+
+missing_df <- data.frame(
+  Column = names(missing_counts),
+  Missing = missing_counts
+)
+
+missing_df <- missing_df[missing_df$Missing > 0, ]
+
+ggplot(missing_df, aes(x = reorder(Column, -Missing), y = Missing)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_text(aes(label = Missing), vjust = -0.5, color = "black") +
+  coord_flip() +
+  labs(
+    title = "Missing Values by Column",
+    x = "Column",
+    y = "Number of Missing Values"
+  ) +
+  theme_minimal()
+```
+
+We observed that **350 rows** in the building dataset contain missing values, accounting for approximately **10% of the total entries**. The columns with the highest number of missing values are **Longitude** and **Latitude**. Other columns with missing values include **Year of Registration**, **Year Built**, and the **X and Y Coordinates** of the building.
+
+Given the large number of missing values in the `Longitude` and `Latitude` columns, and the fact that the dataset already encodes the address using X and Y coordinates, we have decided to drop the `Longitude` and `Latitude` columns from the dataset.
+
+```{r}
+building_clean <- building[, !colnames(building) %in% c("Longitude", "Latitude")]
+```
+
+```{r}
+row_missing <- rowSums(is.na(building_clean))
+
+ggplot(data.frame(Missing = row_missing), aes(x = Missing)) +
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "black") +
+  labs(title = "Distribution of Missing Values per Row", x = "Number of Missing Values", y = "Count") +
+  theme_minimal()
+```
+
+We observed that some rows are missing **X** and **Y coordinates**, but these rows do not have missing values in other features.
