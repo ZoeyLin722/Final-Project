@@ -2,9 +2,9 @@
 
 ## Description
 
-The Apartment Building Evaluation dataset, available from the City of Toronto's Open Data Portal, comprises 3,571 entries and a total of 71 columns. It comprises evaluations of apartment buildings across Toronto, assessing various quality and compliance metrics. The data is publicly accessible through the City of Toronto's Open Data Portal.
+This dataset is available from the City of Toronto's Open Data Portal, which comprises 3,571 entries and 71 columns. It is created for evaluations of apartment buildings across Toronto, assessing various quality and compliance metrics. The data is publicly accessible through the City of Toronto's Open Data Portal.
 
-The dataset is available in CSV format, facilitating easy integration with data analysis tools. Each row represents an individual apartment building evaluation, with columns detailing attributes such as building address, evaluation scores, compliance status, and inspection dates. The dataset is updated by the end of every year.
+The dataset is available in CSV format, which is easy to download and apply in R studio. Each row represents an individual apartment building evaluation, with columns detailing attributes such as building address, evaluation scores, compliance status, and inspection dates. The dataset is updated by the end of every year.
 
 The dataset includes multiple columns capturing various aspects of apartment building evaluations. The number of rows corresponds to the total number of evaluated buildings, which may vary with each update. Key columns include:
 
