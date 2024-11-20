@@ -4,29 +4,20 @@
     "href": "index.html",
     "title": "Final Project",
     "section": "",
-    "text": "1 Introduction",
-    "crumbs": [
-      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
-    ]
+    "text": "1 Introduction\nThe availability and quality of housing are critical indicators of a city’s livability and sustainability. As one of the largest and fastest-growing cities in Canada, Toronto faces significant challenges in maintaining affordable, safe, and high-quality housing for its residents.\nThe Apartment Building Evaluation database, provided by the City of Toronto, serves as a valuable resource for analyzing the quality of housing across the city. This dataset contains useful information, including the physical condition of buildings, availability of amenities, compliance with municipal standards, and management practices. These data points enable a comprehensive assessment of the factors that contribute to the evaluation scores of apartment buildings.\nWe chose this topic because housing is a fundamental human need, and understanding the quality of Toronto’s apartment buildings can shed light on broader issues related to urban living, social equity, and public policy. This analysis is particularly relevant given the rising concerns over housing affordability and safety in urban centers globally.\nThe questions we are interested in studying include:\nWhat patterns emerge in apartment building evaluations across Toronto?\nAre there geographical disparities in building quality within the city?\nWhat factors correlate most strongly with higher or lower evaluation scores?\nHow do building conditions align with socioeconomic indicators in different neighborhoods?"
   },
   {
-    "objectID": "data.html",
-    "href": "data.html",
+    "objectID": "data.html#description",
+    "href": "data.html#description",
     "title": "2  Data",
-    "section": "",
-    "text": "2.1 Description",
-    "crumbs": [
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data</span>"
-    ]
+    "section": "2.1 Description",
+    "text": "2.1 Description\nThis dataset is available from the City of Toronto’s Open Data Portal, which comprises 3,571 entries and 71 columns. It is created for evaluations of apartment buildings across Toronto, assessing various quality and compliance metrics. The data is publicly accessible through the City of Toronto’s Open Data Portal.\nThe dataset is available in CSV format, which is easy to download and apply in R studio. Each row represents an individual apartment building evaluation, with columns detailing attributes such as building address, evaluation scores, compliance status, and inspection dates. The dataset is updated by the end of every year.\nThe dataset includes multiple columns capturing various aspects of apartment building evaluations. The number of rows corresponds to the total number of evaluated buildings, which may vary with each update. Key columns include:\n\nYear Built: The year when the apartment was built.\nEvaluation Score: A numerical score representing the building’s quality assessment.\nWardname: The particular area where the apartment is located.\nProperty Type: The particular type of the apartment (private, social housing, Toronto community Housing Corporation).\n\nThe dataset contains a lot of missing values for variables including “FENCING”, “RETAINING WALLS”, “CATCH BASINS / STORM DRAINAGE”, “CLOTHING DROP BOXES”, “ACCESSORY BUILDINGS”, and so on. These variables might be deleted if missing values are dominant.\nTo import the dataset into R for analysis, first download the CSV file from the website, then use the read.csv() function to load the data.\nThe dataset is available on the City of Toronto’s Open Data Portal: [https://open.toronto.ca/dataset/apartment-building-evaluation/]\n\n\nCode\nbuilding &lt;- read.csv(\"/Users/ruobingzhang/Documents/==/columbia/sem1/stat5702EDA/EDAfinal2/Apartment Building Evaluations 2023 - current.csv\")\n\n\n\n\nCode\nshape &lt;- dim(building)\ncat(\"The dataset has\", shape[1], \"rows and\", shape[2], \"columns.\\n\")\n\n\nThe dataset has 3571 rows and 71 columns."
   },
   {
     "objectID": "data.html#missing-value-analysis",
     "href": "data.html#missing-value-analysis",
     "title": "2  Data",
     "section": "2.2 Missing value analysis",
-    "text": "2.2 Missing value analysis",
-    "crumbs": [
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data</span>"
-    ]
+    "text": "2.2 Missing value analysis\n\n\nCode\nsum(is.na(building))\n\n\n[1] 350\n\n\n\n\nCode\nlibrary(ggplot2)\nmissing_counts &lt;- colSums(is.na(building))\n\nmissing_df &lt;- data.frame(\n  Column = names(missing_counts),\n  Missing = missing_counts\n)\n\nmissing_df &lt;- missing_df[missing_df$Missing &gt; 0, ]\n\nggplot(missing_df, aes(x = reorder(Column, -Missing), y = Missing)) +\n  geom_bar(stat = \"identity\", fill = \"steelblue\") +\n  geom_text(aes(label = Missing), vjust = -0.5, color = \"black\") +\n  coord_flip() +\n  labs(\n    title = \"Missing Values by Column\",\n    x = \"Column\",\n    y = \"Number of Missing Values\"\n  ) +\n  theme_minimal()\n\n\n\n\n\nWe observed that 350 rows in the building dataset contain missing values, accounting for approximately 10% of the total entries. The columns with the highest number of missing values are Longitude and Latitude. Other columns with missing values include Year of Registration, Year Built, and the X and Y Coordinates of the building.\nGiven the large number of missing values in the Longitude and Latitude columns, and the fact that the dataset already encodes the address using X and Y coordinates, we have decided to drop the Longitude and Latitude columns from the dataset.\n\n\nCode\nbuilding_clean &lt;- building[, !colnames(building) %in% c(\"Longitude\", \"Latitude\")]\n\n\n\n\nCode\nrow_missing &lt;- rowSums(is.na(building_clean))\n\nggplot(data.frame(Missing = row_missing), aes(x = Missing)) +\n  geom_histogram(binwidth = 1, fill = \"steelblue\", color = \"black\") +\n  labs(title = \"Distribution of Missing Values per Row\", x = \"Number of Missing Values\", y = \"Count\") +\n  theme_minimal()\n\n\n\n\n\nWe observed that some rows are missing X and Y coordinates, but these rows do not have missing values in other features."
   }
 ]
