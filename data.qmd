@@ -15,7 +15,7 @@ The dataset includes multiple columns capturing various aspects of apartment bui
 
 The dataset contains a lot of missing values for variables including "FENCING", "RETAINING WALLS", "CATCH BASINS / STORM DRAINAGE", "CLOTHING DROP BOXES", "ACCESSORY BUILDINGS", and so on. These variables might be deleted if missing values are dominant.
 
-To import the dataset into R for analysis, first download the CSV file from the website, then use the read.csv() function to load the data.
+To import the dataset into R for analysis, first download the CSV file from website, then use the read.csv() function to load the data.
 
 The dataset is available on the City of Toronto's Open Data Portal: \[https://open.toronto.ca/dataset/apartment-building-evaluation/\]
 
