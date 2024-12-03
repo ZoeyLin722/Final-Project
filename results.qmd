@@ -1,1 +1,211 @@
 # Results
+
+```{r}
+library(ggplot2)
+library(readr)
+library(dplyr)
+library(tidyr)
+library(viridis)
+library(vcd)
+library(grid)
+
+building <- read_csv("Apartment Building Evaluations 2023 - current.csv")
+
+# List of all columns containing "N/A"
+columns_to_clean <- c(
+  "FENCING", "RETAINING WALLS", "CATCH BASINS / STORM DRAINAGE", "BALCONY GUARDS",
+  "EXT. RECEPTACLE STORAGE AREA", "CLOTHING DROP BOXES", "ACCESSORY BUILDINGS",
+  "INTERCOM", "LAUNDRY ROOM", "INT. RECEPTACLE STORAGE AREA", "MAIL RECEPTACLES",
+  "EXTERIOR DOORS", "STORAGE AREAS/LOCKERS MAINT.", "POOLS", "OTHER AMENITIES",
+  "PARKING AREAS", "GARBAGE/COMPACTOR ROOM", "ELEVATOR MAINTENANCE",
+  "ELEVATOR COSMETICS", "COMMON AREA VENTILATION", "CHUTE ROOMS - MAINTENANCE",
+  "EXTERIOR GROUNDS", "BUILDING EXTERIOR", "WINDOWS", "EXTERIOR WALKWAYS",
+  "LOBBY - WALLS AND CEILING", "LOBBY FLOORS", "INT. HALLWAY - WALLS / CEILING",
+  "INTERIOR HALLWAY FLOORS", "INT. LOBBY / HALLWAY LIGHTING",
+  "ELECTRICAL SERVICES / OUTLETS", "STAIRWELL - WALLS AND CEILING",
+  "STAIRWELL - LANDING AND STEPS", "STAIRWELL LIGHTING",
+  "INT. HANDRAIL / GUARD - SAFETY", "INT. HANDRAIL / GUARD - MAINT."
+)
+
+# Replace "N/A" with NA in the specified columns
+building[columns_to_clean] <- lapply(building[columns_to_clean], function(column) {
+  column[column == "N/A"] <- NA
+  return(column)
+})
+
+for (column in columns_to_clean) {
+  missing_count <- sum(is.na(building[[column]]))
+  
+  if (missing_count > 100) {
+    building[[column]] <- NULL
+  } else {
+    building[[column]][is.na(building[[column]])] <- median(building[[column]], na.rm = TRUE)
+  }
+}
+```
+
+
+```{r}
+# For 'year_built' and 'year_registered', impute with median
+building$`YEAR BUILT`[is.na(building$`YEAR BUILT`)] <- median(building$`YEAR BUILT`, na.rm = TRUE)
+building$`YEAR REGISTERED`[is.na(building$`YEAR REGISTERED`)] <- median(building$`YEAR REGISTERED`, na.rm = TRUE)
+
+# For 'x' and 'y', impute with mean
+building$X[is.na(building$X)] <- mean(building$X, na.rm = TRUE)
+building$Y[is.na(building$Y)] <- mean(building$Y, na.rm = TRUE)
+
+# Exclude 'logitude' and 'latitude' columns
+building <- building[, !colnames(building) %in% c("logitude", "latitude")]
+
+# Rename 'PROPRTTY TYPE' for future plot
+building <- building %>%
+  rename(PROPERTYTYPE = `PROPERTY TYPE`)
+```
+
+```{r}
+ggplot(building, aes(x = `CURRENT BUILDING EVAL SCORE`)) +
+  geom_histogram(
+    aes(y = ..density..),
+    binwidth = 3,
+    fill = "skyblue",
+    color = "white",
+    alpha = 0.8
+  ) +
+  geom_density(
+    color = "darkred",
+    size = 1.2,
+    linetype = "dashed"
+  ) +
+  labs(
+    title = "Distribution of Current Building Evaluation Scores",
+    subtitle = "Histogram with density overlay",
+    x = "Current Condo Evaluation Scores",
+    y = "Density"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, face = "italic", hjust = 0.5),
+    axis.text = element_text(size = 10),
+    axis.title = element_text(size = 12, face = "bold")
+  )
+```
+
+```{r}
+ggplot(building, aes(x = `CURRENT BUILDING EVAL SCORE`, y = `PROACTIVE BUILDING SCORE`)) +
+  geom_point(color = "skyblue", size = 2, alpha = 0.7) +  
+  geom_smooth(method = "lm", color = "darkred", linetype = "solid", size = 1) +  
+  facet_wrap(~ PROPERTYTYPE, scales = "free") +  
+  labs(
+    title = "Proactive Building Score vs Current Evaluation Score",
+    subtitle = "Faceted by Property Type",
+    x = "Current Building Evaluation Score",
+    y = "Proactive Building Score"
+  ) +
+  theme_minimal(base_size = 14) +  
+  theme(
+    strip.text = element_text(size = 14, face = "bold", color = "black"),  
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5),  
+    plot.subtitle = element_text(size = 14, face = "italic", hjust = 0.5, color = "gray40"),  
+    axis.title = element_text(size = 14, face = "bold"),  
+    axis.text = element_text(size = 12),  
+    panel.grid = element_line(color = "gray80", linetype = "dotted"),  
+    legend.position = "none"  
+  )
+```
+
+
+```{r}
+ggplot(building, aes(x = `YEAR BUILT`, y = `CURRENT BUILDING EVAL SCORE`)) +
+  stat_bin2d(
+    bins = 50,              
+    aes(fill = ..count..)
+  ) +
+  scale_fill_gradientn(
+    colors = viridis::turbo(10), 
+    name = "Building Count"
+  ) +
+  labs(
+    title = "Building Evaluation Scores by Year Built",
+    subtitle = "Density of Buildings Evaluated Across Different Years",
+    x = "Year Built",
+    y = "Building Evaluation Score"
+  ) +
+  theme_minimal(base_size = 16) +
+  theme(
+    plot.title = element_text(
+      size = 22, face = "bold", hjust = 0.5, color = "#333333"
+    ),
+    plot.subtitle = element_text(
+      size = 16, hjust = 0.5, color = "#555555"
+    ),
+    axis.title.x = element_text(size = 14, face = "bold"),
+    axis.title.y = element_text(size = 14, face = "bold"),
+    axis.text = element_text(size = 12, color = "#333333"),
+    legend.title = element_text(size = 12, face = "bold"),
+    legend.text = element_text(size = 10),
+    panel.grid.major = element_line(color = "gray85", size = 0.5),
+    panel.grid.minor = element_blank()
+  )
+
+```
+
+
+```{r}
+ggplot(building, aes(x = `YEAR BUILT`, y = `CURRENT BUILDING EVAL SCORE`)) +
+  geom_point(color = "dodgerblue", alpha = 0.6, size = 2) +  
+  geom_smooth(method = "lm", color = "darkred", linetype = "dashed", se = FALSE, size = 1) +  
+  facet_wrap(~ `MAINTENANCE LOG`, ncol = 2) +  
+  labs(
+    title = "Scatterplot: Current Building Evaluation Score vs Year Built",
+    subtitle = "Faceted by Maintenance Log",
+    x = "Year Built",
+    y = "Current Building Evaluation Score"
+  ) +
+  theme_minimal(base_size = 14) +  
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5, color = "darkblue"),  
+    plot.subtitle = element_text(size = 12, face = "italic", hjust = 0.5, color = "gray40"),  
+    strip.text = element_text(size = 14, face = "bold", color = "darkgreen"),  
+    axis.title = element_text(size = 12, face = "bold"),
+    axis.text = element_text(size = 10),
+    panel.grid.major = element_line(color = "gray80", linetype = "dotted"),  
+    panel.grid.minor = element_blank(), 
+    panel.background = element_rect(fill = "white", color = "gray90"),  
+    strip.background = element_rect(fill = "lightgray", color = "gray70"),  
+    plot.margin = margin(t = 10, r = 10, b = 10, l = 10)  
+  )
+
+```
+
+
+```{r}
+building <- building %>%
+  mutate(
+    old_or_new = ifelse(`YEAR BUILT` > 1960, "new", "old"),
+    high_or_low = ifelse(
+      `CURRENT BUILDING EVAL SCORE` >= mean(`CURRENT BUILDING EVAL SCORE`, na.rm = TRUE),
+      "high", "low"
+    )
+  )
+
+mosaic(
+  ~ high_or_low + old_or_new + PROPERTYTYPE, 
+  data = building,
+  highlighting = "PROPERTYTYPE",
+  highlighting_fill = c("#ADD8E6", "#4682B4", "#00008B"),  
+  direction = c("v", "v", "h"),  
+  main = "Mosaic Plot of Building Characteristics",
+  sub = "Split by Evaluation Score, Year Built, and Property Type",
+  labeling_args = list(
+    gp_labels = gpar(fontsize = c(10, 8, 6), fontface = "bold"),  
+    gp_varnames = gpar(fontsize = 10, fontface = "bold", col = "darkblue"),  
+    rot_labels = c(0, 0, 45),  
+    just_labels = c("center", "center", "center")  
+  ),
+  keep_aspect_ratio = FALSE,  
+  margins = unit(c(2, 2, 2, 4), "lines")  
+)
+
+```
+
