@@ -1,7 +1,5 @@
 # Results
 
-## Data Preprocessing
-
 ```{r}
 suppressMessages(suppressWarnings({
 library(ggplot2)
@@ -15,11 +13,12 @@ library(ggalluvial)
 library(GGally)
 library(ggridges)
 }))
+options(warn = -1)
 ```
 
 ```{r}
 suppressMessages(suppressWarnings({
-building <- read_csv("Apartment Building Evaluations 2023 - current.csv")
+building <- read_csv("/Users/ruobingzhang/Documents/==/columbia/sem1/stat5702EDA/EDAfinal2/Apartment Building Evaluations 2023 - current.csv")
 
 # List of all columns containing "N/A"
 columns_to_clean <- c(
@@ -46,10 +45,17 @@ building[columns_to_clean] <- lapply(building[columns_to_clean], function(column
 for (column in columns_to_clean) {
   missing_count <- sum(is.na(building[[column]]))
   
-  if (missing_count > 100) {
+  #if (missing_count > 100) {
+  #  building[[column]] <- NULL
+ # } else {
+  #  building[[column]][is.na(building[[column]])] <- median(building[[column]], na.rm = TRUE)
+  #}
+#}
+
+if (missing_count > 100) {
     building[[column]] <- NULL
   } else {
-    building[[column]][is.na(building[[column]])] <- median(building[[column]], na.rm = TRUE)
+    building[[column]][is.na(building[[column]])] <- 0
   }
 }
 }))
@@ -72,7 +78,9 @@ building <- building |>
   rename(PROPERTYTYPE = `PROPERTY TYPE`)
 ```
 
-## Investigate housing quality with respect to region in Toronto
+## Housing Quality and Regional Disparities in Toronto
+
+Studying the relationship between housing quality and regional differences is crucial for both prospective residents and investors in Toronto. To represent housing quality, we utilized the Current Building Evaluation Scores from our dataset. By visualizing these scores with a density plot, we can observe their distribution across the city.
 
 ```{r}
 ggplot(building, aes(x = `CURRENT BUILDING EVAL SCORE`)) +
@@ -85,7 +93,7 @@ ggplot(building, aes(x = `CURRENT BUILDING EVAL SCORE`)) +
   ) +
   geom_density(
     color = "darkred",
-    size = 1.2,
+    linewidth = 1.2,
     linetype = "dashed"
   ) +
   labs(
@@ -103,7 +111,7 @@ ggplot(building, aes(x = `CURRENT BUILDING EVAL SCORE`)) +
   )
 ```
 
-The distribution appears to be left-skewed, with the majority of condo evaluation scores concentrated on the higher end (around 75--100). This indicates that most buildings in Toronto have relatively high evaluation scores, with fewer buildings falling in the lower quality range.
+From this histogram, we observed that the distribution appears to be left-skewed, with the majority of condo evaluation scores concentrated on the higher end (around 75--100). This indicates that most buildings in Toronto have relatively high evaluation scores, with fewer buildings falling in the lower quality range. To further investigate the evaluation scores in specific regions, we divided the city using Toronto's 25-ward system and visualized the distribution of different property types within each ward using a Cleveland dot plot.
 
 ```{r}
 cleveland_data <- building |>
@@ -115,7 +123,7 @@ ward_scores <- cleveland_data |>
   arrange(AverageScore)
 
 ggplot(ward_scores, aes(x = AverageScore, y = reorder(WARDNAME, AverageScore), color = PROPERTYTYPE)) +
-  geom_point(size = 3, alpha = 0.6) + 
+  geom_point(linewidth = 3, alpha = 0.6) + 
   geom_segment(aes(x = min(AverageScore), xend = AverageScore, 
                    y = reorder(WARDNAME, AverageScore), 
                    yend = reorder(WARDNAME, AverageScore)),
@@ -142,43 +150,19 @@ ggplot(ward_scores, aes(x = AverageScore, y = reorder(WARDNAME, AverageScore), c
   scale_color_viridis_d() 
 ```
 
-Based on this Cleveland dot plot, the scores vary slightly across wards, but overall, private properties consistently have higher average scores. This suggests that the quality of housing may be influenced by property type, with private housing generally outperforming the others.
+Based on this Cleveland dot plot, Social Housing and TCHC properties exhibit significant variance in evaluation scores, while Private Housing tends to have more consistent scores, generally concentrated in the higher range. Notably, Social Housing in the Scarborough and Etobicoke Centre wards stands out with exceptionally high scores, exceeding 95, which could be attributed to recent investments in renovation and maintenance or newer construction in these areas. On the other hand, wards like Davenport, Beaches-East York, and Humber River-Black Creek have the lowest overall evaluation scores. This may reflect aging infrastructure, limited funding for maintenance, or a higher concentration of older properties, particularly in social housing categories.
 
 ```{r}
 filtered_data <- building |>
   filter(!is.na(WARDNAME) & !is.na(`CURRENT BUILDING EVAL SCORE`))
 
-ggplot(data = filtered_data, aes(
-  x = `CURRENT BUILDING EVAL SCORE`,
-  y = WARDNAME,
-  fill = WARDNAME
-)) +
-  geom_density_ridges(scale = 2, alpha = 0.8) + 
-  scale_fill_viridis_d(option = "plasma") + 
-  labs(
-    title = "Ridgeline Plot of Current Eval Scores",
-    x = "Current Building Evaluation Score",
-    y = "Ward Name",
-    fill = "Ward"
-  ) +
-  theme_minimal(base_size = 16) +
-  theme(
-    plot.title = element_text(hjust = 0.5, size = 20, face = "bold"),
-    axis.text.x = element_text(size = 12, angle = 0),
-    axis.text.y = element_text(size = 12),
-    axis.title.x = element_text(size = 14, face = "bold"),
-    axis.title.y = element_text(size = 14, face = "bold"),
-    legend.position = "none" 
-  )
-```
-
-```{r}
 filtered_data <- filtered_data %>%
   group_by(WARDNAME) %>%
   mutate(MedianScore = median(`CURRENT BUILDING EVAL SCORE`, na.rm = TRUE)) %>%
   ungroup() %>%
   mutate(WARDNAME = reorder(WARDNAME, MedianScore))
 
+suppressMessages({
 ggplot(data = filtered_data, aes(
   x = `CURRENT BUILDING EVAL SCORE`,
   y = WARDNAME,
@@ -205,6 +189,7 @@ ggplot(data = filtered_data, aes(
     axis.title.y = element_text(size = 14, face = "bold"),
     legend.position = "none"
   )
+})
 
 ```
 
@@ -216,37 +201,44 @@ iqr_val <- IQR(building$`CURRENT BUILDING EVAL SCORE`, na.rm = TRUE)
 building$robust_scaled_score <- (building$`CURRENT BUILDING EVAL SCORE` - median_val) / iqr_val
 
 building$robust_scaled_score <- (building$`CURRENT BUILDING EVAL SCORE` - median_val) / iqr_val
-ggplot(building, aes(x = X, y = Y, color = `CURRENT BUILDING EVAL SCORE`)) + 
-  geom_point(size = 2, alpha = 0.6) + 
-  scale_color_gradient(low = "red", high = "green") + 
-  labs(title = "Building Evaluation Scores by Location", x = "Longitude", y = "Latitude", color = "Score") + 
-  theme_minimal()
 ```
 
 ```{r}
 # Define a threshold for low scores (e.g., below the first quartile)
-low_threshold <- quantile(building$`CURRENT BUILDING EVAL SCORE`, 0.01, na.rm = TRUE)
+low_threshold <- quantile(building$`CURRENT BUILDING EVAL SCORE`, 0.005, na.rm = TRUE)
 
 # Add a new column to classify points
 building$score_category <- ifelse(building$`CURRENT BUILDING EVAL SCORE` < low_threshold, "Low", "Others")
 
-# Plot with highlighted low scores
+# Plot with highlighted low scores and region labels
 ggplot(building, aes(x = X, y = Y)) +
-  geom_point(aes(color = `CURRENT BUILDING EVAL SCORE`), size = 2, alpha = 0.6) +  # General points
-  geom_point(data = subset(building, score_category == "Low"), 
-             aes(x = X, y = Y), color = "blue", size = 3, shape = 4) +  # Highlight low scores
+  # General points
+  geom_point(aes(color = `CURRENT BUILDING EVAL SCORE`), size = 2, alpha = 0.6) +
+  # Highlight low scores
+  geom_point(data = subset(building, score_category == "Low"),
+             aes(x = X, y = Y), color = "blue", size = 3, shape = 4) +
+  # Add region labels for low scores
+  geom_text(data = subset(building, score_category == "Low"),
+            aes(x = X, y = Y, label = WARDNAME),  # Replace 'WARDNAME' with the actual column name for region
+            size = 3, hjust = -0.2, color = "black") +
+  # Color gradient for scores
   scale_color_gradient(low = "red", high = "green") +
+  # Labels and themes
   labs(
     title = "Building Evaluation Scores by Location",
-    x = "Longitude",
-    y = "Latitude",
+    x = "X Coordinate",
+    y = "Y Coordinate",
     color = "Score"
   ) +
   theme_minimal()
 
 ```
 
-## Explore trends in property types across time in Toronto
+The plot reveals that low-scoring apartments, marked with blue crosses, are often located near the city center or in historically older neighborhoods, such as Parkdale-High Park and Spadina-Fort York. In contrast, high-scoring apartments, represented by green dots, cluster in areas like Scarborough Centre and Don Valley North, which likely benefit from newer constructions, better maintenance, and stronger urban planning. These observations highlight significant regional disparities in building quality, potentially influenced by factors like economic conditions and property types. Next, we will explore the relationship between scores and building ageto understand whether older buildings tend to have lower evaluations.
+
+## Trends in Property Types across Time in Toronto
+
+As Toronto continues to grow, shifts in property types---such as the rise of private apartments, the development of social housing, and changes in TCHC properties---offer insights into urban planning, population demands, and socioeconomic trends. This part will examine historical and recent data on property types, analyzing their distribution across different time periods. By visualizing these trends, we aim to uncover patterns that could inform future housing policies and urban development strategies.
 
 ```{r}
 ggplot(building, aes(x = `YEAR BUILT`, y = `CURRENT BUILDING EVAL SCORE`)) +
@@ -283,7 +275,7 @@ ggplot(building, aes(x = `YEAR BUILT`, y = `CURRENT BUILDING EVAL SCORE`)) +
 
 ```
 
-The heatmap shows that most buildings are built a bit after 1950 as the red center is positioned at around 1960. Overall, the majority of buildings were constructed between 1950 and 2000, whereas buildings constructed before 1900 are sparse. There are still a few buildings plotted after 2000, possibly because of limited data availability or fewer constructions.
+The heatmap shows that most buildings are built a bit after 1950 as the red center is positioned at around 1960. Overall, the majority of buildings were constructed between 1950 and 2000, whereas buildings constructed before 1900 are sparse. There are still a few buildings plotted after 2000, possibly because of limited data availability or fewer constructions. In terms of evaluation scores, buildings constructed between 1950 and 2000 generally show a higher density of scores clustering around the 75-100 range, indicating better overall quality or maintenance. Conversely, buildings constructed before 1900 tend to have more dispersed and lower scores, reflecting potential issues with aging infrastructure and upkeep. Buildings built after 2000 exhibit high evaluation scores, although their count is relatively low.
 
 ```{r}
 building$YearGroup <- cut(
@@ -353,9 +345,13 @@ mosaic(
 )
 ```
 
-The mosaic plot further validates the result from alluvial diagram that private buildings are dominant, whereas its proportion decreases overtime. Thus, the proportion of non-private buildings appears to be higher in the new buildings category compared to the old. As for evaluation scores, older buildings tend to have both high and low evaluation scores, but the overall presence of social housing and TCHC in these buildings is minimal.
+The mosaic plot further complements the findings from the heatmap and alluvial diagram, revealing that private buildings are the dominant property type across all time periods. However, their proportion has decreased over time, as new buildings have seen a relatively higher representation of non-private property types such as social housing and TCHC. This shift suggests a gradual diversification of property types in Toronto's housing landscape.
 
-## Investigate factors affecting housing quality in Toronto
+In terms of evaluation scores, the mosaic plot highlights an interesting pattern: older buildings tend to have both high and low evaluation scores, indicating greater variability in their condition. This aligns with the heatmap, which shows a more dispersed distribution of scores for older buildings, likely due to aging infrastructure and inconsistent maintenance practices. In contrast, newer buildings exhibit a tighter range of scores, with a notable concentration in the higher evaluation categories, as seen in the heatmap's red and green clusters around the 75--100 range.
+
+## Factors Affecting Evaluation Scores in Toronto
+
+Evaluation scores are shaped by a variety of elements, including building age, property type, maintenance levels, and regional characteristics. By analyzing these factors, we can uncover patterns and relationships that reveal why certain buildings achieve higher scores while others lag behind. This part will use data on building attributes, such as cleaniess, repair plans, and maintainance, to explore how these variables contribute to evaluation outcomes.
 
 ```{r}
 ggplot(building, aes(x = `YEAR BUILT`, y = `CURRENT BUILDING EVAL SCORE`)) +
@@ -381,6 +377,7 @@ ggplot(building, aes(x = `YEAR BUILT`, y = `CURRENT BUILDING EVAL SCORE`)) +
     strip.background = element_rect(fill = "lightgray", color = "gray70"),  
     plot.margin = margin(t = 10, r = 10, b = 10, l = 10)  
   )
+
 ```
 
 Across all facets, there seems to be a positive trend where newer buildings generally have higher evaluation scores. Higher cleanliness levels (2 and 3) are associated with higher evaluation scores, regardless of building age, whereas poor cleanliness (level 0) is more common in older buildings, highlighting a potential focus area for improvement in housing quality.
@@ -388,14 +385,11 @@ Across all facets, there seems to be a positive trend where newer buildings gene
 ```{r}
 data_for_plot <- building[, c("YEAR BUILT", "BUILDING CLEANLINESS", "CONFIRMED STOREYS", "CURRENT BUILDING EVAL SCORE")]
 
-# 随机采样500行
 set.seed(123)
 data_sampled <- data_for_plot[sample(1:nrow(data_for_plot), size = 500), ]
 
-# 删除缺失值
 data_sampled <- na.omit(data_sampled)
 
-# 创建分组列：将年份分为三个组
 data_sampled <- data_sampled %>%
   mutate(
     year_group = case_when(
@@ -405,13 +399,12 @@ data_sampled <- data_sampled %>%
     )
   )
 
-# 绘制平行坐标图
 ggparcoord(
   data = data_sampled,
-  columns = 1:4,             # 指定列
-  groupColumn = "year_group", # 按分组着色
-  scale = "uniminmax",       # 数据归一化
-  alphaLines = 0.5           # 透明度
+  columns = 1:4,            
+  groupColumn = "year_group", 
+  scale = "uniminmax",   
+  alphaLines = 0.5   
 ) +
   labs(
     title = "Parallel Coordinate Plot of Building Attributes by Year Group",
@@ -420,38 +413,32 @@ ggparcoord(
   ) +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1), # 调整列名角度
-    axis.text.y = element_text(size = 10)             # 调整y轴数字的大小
+    axis.text.x = element_text(angle = 45, hjust = 1), 
+    axis.text.y = element_text(size = 10)    
   )
 ```
 
-```{r}
-suppressPackageStartupMessages({
-library(tibble)
-library(dplyr)
-library(parcoords)
-})
+The alluvial graph reveals that newer buildings tend to receive higher evaluation scores due to better cleanliness standards and more modern infrastructure. In contrast, older buildings generally have lower scores, often attributed to outdated structures and less favorable maintenance conditions. Medium-aged buildings display more variability in certain attributes, such as the number of storeys, which might influence their evaluation scores. These findings highlight the importance of maintenance and modernization in improving building evaluations across different age groups.
 
-parcoords(
-  data = data_sampled,
-  rownames = FALSE,        
-  brushMode = "1D-axes",   
-  reorderable = TRUE,      
-  queue = TRUE,            
-  autoresize = TRUE,       
-  color = list(
-    colorBy = "maintenance_status",    
-    colorScale = "scaleOrdinal",       
-    colorScheme = "schemeCategory10"   
-  ),
-  withD3 = TRUE             
-)
+```{r}
+ggplot(building, aes(x = `STAIRWELL LIGHTING`, y = `CURRENT BUILDING EVAL SCORE`)) + 
+  geom_jitter(aes(color = `BUILDING CLEANLINESS`), alpha = 0.6, size = 2) +
+  labs(
+    title = "Impact of Stairwell Lighting and Cleanliness on Evaluation Score",
+    x = "Stairwell Lighting Score",
+    y = "Building Evaluation Score",
+    color = "Building Cleanliness"
+  ) +
+  theme_minimal()
 ```
 
-New buildings exhibit more consistent attributes and generally perform better across all evaluated metrics. Medium-aged buildings show relatively balanced characteristics but fall slightly short compared to new buildings in terms of overall performance. Older buildings display greater variability in their attributes, with overall evaluation scores tending to be lower, highlighting the need for special attention to cleanliness and maintenance.
+The scatterplot reveals the combined impact of stairwell lighting and building cleanliness on evaluation scores. Higher stairwell lighting scores (2 and 3) are generally associated with higher building evaluation scores, clustering around the 75–100 range. This trend is further emphasized by the color gradient representing building cleanliness: buildings with higher cleanliness levels (darker blue) tend to achieve higher evaluation scores, even when stairwell lighting scores are moderate. Conversely, buildings with lower cleanliness levels (lighter blue) are more widely dispersed and more likely to have lower evaluation scores, regardless of their stairwell lighting scores. This suggests that while both factors are important, building cleanliness plays a critical role in achieving higher evaluation scores.
 
-## Conclusion
+## Summary
 
 Overall, housing quality, measured through evaluation scores, shows that most buildings perform well, with scores concentrated between 80 and 100. However, some regions display clusters of lower-quality housing, particularly in social housing and TCHC properties, which tend to score lower than private properties. Regional variability is evident, with certain wards (e.g. Willowdale, Toronto-Danforth, etc.) consistently scoring higher than others, reflecting disparities in housing conditions across the city.
 
 Over time, private housing has remained the dominant property type, but newer developments show a growing presence of social housing and TCHC properties, highlighting shifts in urban development priorities. Housing quality is influenced by factors like the year built and building cleanliness, with modern buildings and well-maintained properties scoring higher. These findings emphasize the importance of maintenance and infrastructure improvements in enhancing housing quality and provide valuable guidance for policymakers to address regional disparities and prioritize upgrades in lower-performing areas.
+
+Analysis also shows that factors such as the year of construction, building cleanliness, and stairwell lighting  influence evaluation scores. Modern, well-maintained, and better-lit buildings tend to score higher.
+
