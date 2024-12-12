@@ -4,10 +4,16 @@
   * {
     font-family: sans-serif;
   }
-</style> 
+</style>
 
 <div id="plot">
 </div>
 
+<p></p>
+<button onclick="updatePieChart(year1Data, 'Early Period')">Early Period</button> 
+<button onclick="updatePieChart(year2Data, 'Mid Period')">Mid Period</button> 
+<button onclick="updatePieChart(year3Data, 'Recent Period')">Recent Period</button>
+
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
 <script src="scripts/myscript.js"></script>
