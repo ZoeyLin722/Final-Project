@@ -19,7 +19,7 @@ library(ggridges)
 
 ```{r}
 suppressMessages(suppressWarnings({
-building <- read_csv("/Users/ruobingzhang/Documents/==/columbia/sem1/stat5702EDA/EDAfinal2/Apartment Building Evaluations 2023 - current.csv")
+building <- read_csv("Apartment Building Evaluations 2023 - current.csv")
 
 # List of all columns containing "N/A"
 columns_to_clean <- c(
@@ -449,3 +449,9 @@ parcoords(
 ```
 
 New buildings exhibit more consistent attributes and generally perform better across all evaluated metrics. Medium-aged buildings show relatively balanced characteristics but fall slightly short compared to new buildings in terms of overall performance. Older buildings display greater variability in their attributes, with overall evaluation scores tending to be lower, highlighting the need for special attention to cleanliness and maintenance.
+
+## Conclusion
+
+Overall, housing quality, measured through evaluation scores, shows that most buildings perform well, with scores concentrated between 80 and 100. However, some regions display clusters of lower-quality housing, particularly in social housing and TCHC properties, which tend to score lower than private properties. Regional variability is evident, with certain wards (e.g. Willowdale, Toronto-Danforth, etc.) consistently scoring higher than others, reflecting disparities in housing conditions across the city.
+
+Over time, private housing has remained the dominant property type, but newer developments show a growing presence of social housing and TCHC properties, highlighting shifts in urban development priorities. Housing quality is influenced by factors like the year built and building cleanliness, with modern buildings and well-maintained properties scoring higher. These findings emphasize the importance of maintenance and infrastructure improvements in enhancing housing quality and provide valuable guidance for policymakers to address regional disparities and prioritize upgrades in lower-performing areas.
