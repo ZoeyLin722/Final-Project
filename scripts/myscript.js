@@ -1,4 +1,5 @@
 // add your JavaScript/D3 to this file
+
 const width = 400;
 const height = 600;
 const radius = Math.min(width, height - 100) / 2; 
@@ -93,5 +94,5 @@ function updatePieChart(data, label) {
     .text(d => d);
 }
 
-// Initialize with the first year's data
-updatePieChart(year1Data, 'Early period');
+// Initialize
+updatePieChart(year3Data, 'Recent period');

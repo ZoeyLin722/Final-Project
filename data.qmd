@@ -20,7 +20,7 @@ To import the dataset into R for analysis, first download the CSV file from the 
 The dataset is available on the City of Toronto's Open Data Portal: \[https://open.toronto.ca/dataset/apartment-building-evaluation/\]
 
 ```{r}
-building <- read.csv("Apartment Building Evaluations 2023 - current.csv")
+building <- read.csv("/Users/ruobingzhang/Documents/==/columbia/sem1/stat5702EDA/EDAfinal2/Apartment Building Evaluations 2023 - current.csv")
 ```
 
 ```{r}
