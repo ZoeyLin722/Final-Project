@@ -24,4 +24,3 @@ The questions we are interested in studying include:
 
 **What factors correlate most strongly with higher or lower evaluation scores?**
 
-**How do building conditions align with socioeconomic indicators in different neighborhoods?**
