@@ -1,7 +1,8 @@
 // add your JavaScript/D3 to this file
-const width = 400;
+
+const width = 600;  
 const height = 600;
-const radius = Math.min(width, height - 100) / 2; 
+const radius = Math.min(width - 200, height - 100) / 2; 
 
 const svg = d3.select("div#plot")
   .append("svg")
@@ -9,7 +10,7 @@ const svg = d3.select("div#plot")
   .attr("height", height);
 
 svg.append("text")
-  .attr("x", width / 2)
+  .attr("x", (width - 200) / 2)
   .attr("y", 20)
   .attr("text-anchor", "middle")
   .style("font-size", "16px")
@@ -17,10 +18,10 @@ svg.append("text")
   .text("Property Types by Year Built Group");
 
 const g = svg.append("g")
-  .attr("transform", `translate(${width / 2}, ${height / 2 - 50})`);
+  .attr("transform", `translate(${(width - 200) / 2}, ${height / 2 - 50})`);
 
-const colors = ["#2E8B57", "#FF7F50", "#DAA520"]; 
-const labels = ["TCHC", "Social Housing", "Private"]; 
+const colors = ["#2E8B57", "#FF7F50", "#DAA520"];
+const labels = ["TCHC", "Social Housing", "Private"];
 
 const arc = d3.arc()
   .innerRadius(0)
@@ -67,12 +68,13 @@ function updatePieChart(data, label) {
   svg.select(".center-text").remove();
   svg.append("text")
     .attr("class", "center-text")
-    .attr("x", width / 2)
+    .attr("x", (width - 200) / 2)
     .attr("y", height / 2 - 50)
     .attr("text-anchor", "middle")
     .style("font-size", "14px")
     .text(label);
 
+  //legend
   const legend = svg.selectAll(".legend")
     .data(labels)
     .enter().append("g")
@@ -91,7 +93,19 @@ function updatePieChart(data, label) {
     .attr("dy", ".35em")
     .style("text-anchor", "end")
     .text(d => d);
+  
+  // text
+  svg.selectAll(".long-text").remove();
+  svg.append("foreignObject")
+    .attr("class", "long-text")
+    .attr("x", width - 180)  
+    .attr("y", 50)
+    .attr("width", 180)
+    .attr("height", height - 100)
+    .append("xhtml:body")
+    .style("font-size", "12px")
+    .html(`<p>This chart illustrates the distribution of property types across different year groups, categorized into three property types: Private Apartments, TCHC, and Social Housing. To better present the results, the building construction periods are divided into three distinct timeframes: the Recent Period (1956–2023), the Mid Period (1881–1955), and the Early Period (1805–1880). By interacting with the buttons for each period, you can observe changes in the pie chart, showcasing the evolution of property types over time. This visualization highlights the shifts in construction trends and the prevalence of different property types during each period.</p>`);
 }
 
-// Initialize with the first year's data
-updatePieChart(year1Data, 'Early period');
+// initialize
+updatePieChart(year3Data, 'Recent period');
